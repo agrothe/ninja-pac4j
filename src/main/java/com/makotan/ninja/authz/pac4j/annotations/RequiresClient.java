@@ -26,6 +26,5 @@ import org.pac4j.core.client.BaseClient;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD, })
 public @interface RequiresClient {
-	//Class<? extends BaseClient> value();
 	String value();
 }

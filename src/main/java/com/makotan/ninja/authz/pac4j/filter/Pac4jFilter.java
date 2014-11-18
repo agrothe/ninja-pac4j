@@ -92,7 +92,6 @@ public class Pac4jFilter implements Filter {
         if (profile != null) {
         	// check roles and permission
         	boolean allowed = isAccessAllowed(profile, context);
-        	logger.info("User allowed to enter this method? "+allowed);
         	if (!allowed) {
         		return ninja.getForbiddenResult(context);
         	}
@@ -119,7 +118,6 @@ public class Pac4jFilter implements Filter {
             	String clientName=null;
                 String annotatedClient = getClientNameFromAnnotation(context);
                 if (annotatedClient != null) {
-                	logger.info("@client name"+annotatedClient);
             		clientName = annotatedClient;
             	}
             	else {
@@ -130,9 +128,7 @@ public class Pac4jFilter implements Filter {
                     clientName = properties.get(PAC4J_CLIENT_NAME);
                 }
                 
-                //Client<Credentials, CommonProfile> client = clients.findClient(clientName);
                 BaseClient<Credentials, CommonProfile> bclient = (BaseClient<Credentials, CommonProfile>)clients.findClient(clientName);
-                //redirectUrl = client.getRedirectionUrl(web);
                 try {
                 	redirectUrl = bclient.getRedirectAction(web, false, false).getLocation();
                 	logger.info("URL: "+redirectUrl);
@@ -140,7 +136,7 @@ public class Pac4jFilter implements Filter {
 					e1.printStackTrace();
 				}
             }
-            logger.info("XX redirectUrl :  "+redirectUrl);
+            logger.info("redirectUrl :  "+redirectUrl);
             
             return Results.redirect(redirectUrl);
         }
@@ -151,7 +147,6 @@ public class Pac4jFilter implements Filter {
 		Method method = context.getRoute().getControllerMethod();
 		RequiresClient anno = null;
 		if (method.isAnnotationPresent(RequiresClient.class)) {
-			logger.info("contains RequiresClient annotation");
 			anno = method.getAnnotation(RequiresClient.class);
 		}
 		else if (clazz.isAnnotationPresent(RequiresClient.class)) {
@@ -159,8 +154,6 @@ public class Pac4jFilter implements Filter {
 		}
 		
 		if (anno != null) {
-			//Class<? extends BaseClient> client = anno.value();
-			//String client_name = client.getClass().getSimpleName();
 			return anno.value();
 		}
 		
@@ -171,11 +164,6 @@ public class Pac4jFilter implements Filter {
     	if (hasRolesAccess(profile, context) && hasPermissionsAccess(profile, context)) {
     		return true;
     	}
-    	return false;
-    }
-    
-    protected boolean onAccessDenied(Context context) {
-    	
     	return false;
     }
     
@@ -200,14 +188,6 @@ public class Pac4jFilter implements Filter {
 		
 		if (anno != null) {
 			logger.info("RequiresRoles annotation found. Validating roles...");
-			for (String value : anno.value() ) {
-				logger.info("ROLE: "+value);
-			}
-			
-			for (String value :profile.getRoles() ) {
-				logger.info("USER ROLE: "+value);
-			}
-			
 			if (anno.value().length > 1 && anno.logical().equals(Logical.OR)) {
 				for (String role : anno.value()) {
 					if (profile.getRoles().contains(role)) {
@@ -219,28 +199,21 @@ public class Pac4jFilter implements Filter {
 			return profile.getRoles().containsAll(Arrays.asList(anno.value()));
 		}
 		
-		logger.info(RequiresRoles.class.getSimpleName()+ " annotation was not found in this method.");
     	return true;
     }
     
     /**
-     * returns true if all permissions are granted to the user or no permission annotation specified on the type of method. Returns false if no or not all permissions are granted to the user.
+     * returns true if all permissions are granted to the user or no <code>@RequiresPermission<code> annotation specified on the type of method. Returns false if no or not all permissions are granted to the user.
      * 
      * @param profile the user profile
      * @param context the web context
      * @return true if this user contains all permissions specified on this method or type. 
-     */
-    /**
-     * @param profile
-     * @param context
-     * @return
      */
     protected boolean hasPermissionsAccess(CommonProfile profile, Context context) {
     	Class clazz = context.getRoute().getControllerClass();
 		Method method = context.getRoute().getControllerMethod();
 		RequiresPermission anno = null;
 		if (method.isAnnotationPresent(RequiresPermission.class)) {
-			logger.info("contains RequiresPermissions annotation");
 			anno = method.getAnnotation(RequiresPermission.class);
 		}
 		else if (clazz.isAnnotationPresent(RequiresPermission.class)) {
@@ -249,14 +222,6 @@ public class Pac4jFilter implements Filter {
 		
 		if (anno != null) {
 			logger.info("RequiresPermissions annotation found. Validating permissions...");
-			for (String value : anno.value() ) {
-				logger.info("PERMISSION: "+value);
-			}
-			
-			for (String value :profile.getPermissions() ) {
-				logger.info("USER PERMISSION: "+value);
-			}
-			
 			if (anno.value().length > 1 && anno.logical().equals(Logical.OR)) {
 				for (String permission : anno.value()) {
 					if (profile.getPermissions().contains(permission)) {
