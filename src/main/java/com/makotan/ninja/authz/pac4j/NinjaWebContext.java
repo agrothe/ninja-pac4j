@@ -12,17 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * @author Makotan
+ * @author Muhammad Khairuddin Ahamad
+ * 
  */
 package com.makotan.ninja.authz.pac4j;
 
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
+
 import org.pac4j.core.context.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
+
 import java.io.*;
 import java.util.Map;
 
@@ -62,6 +68,7 @@ public class NinjaWebContext implements WebContext {
         }
         String data = DatatypeConverter.printBase64Binary(baos.toByteArray());
         context.getSession().put(name , data);
+        
     }
 
     @Override
@@ -102,4 +109,28 @@ public class NinjaWebContext implements WebContext {
     public Result getResult() {
         return result;
     }
+
+	@Override
+	public String getFullRequestURL() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getScheme() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getServerName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getServerPort() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

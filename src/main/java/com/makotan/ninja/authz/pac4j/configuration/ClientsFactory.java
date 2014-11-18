@@ -15,6 +15,9 @@
  */
 package com.makotan.ninja.authz.pac4j.configuration;
 
+import ninja.Context;
+
+import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
 
 /**
@@ -31,4 +34,6 @@ public interface ClientsFactory {
      * @return all the clients.
      */
     Clients build();
+    
+    Client findClient(Context context);
 }

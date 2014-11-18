@@ -12,74 +12,91 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
  */
 package com.makotan.ninja.authz.pac4j.util;
 
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import ninja.Context;
+
 import com.makotan.ninja.authz.pac4j.NinjaWebContext;
+
 import org.pac4j.core.profile.CommonProfile;
 
 @Singleton
 public class UserUtils {
-    private final static String PAC4J_PROFILE = "pac4jProfile";
-    private static final String CONTEXT_PROFILE_NAME = "pac4j_context_profile";
+	private final static String PAC4J_PROFILE = "pac4jProfile";
+	private static final String CONTEXT_PROFILE_NAME = "pac4j_context_profile";
 
-    @Inject
-    ProfileAccess profileAccess;
+	@Inject
+	ProfileAccess profileAccess;
 
-    /**
-     * Return if the user is authenticated.
-     *
-     * @param context
-     * @return if the user is authenticated
-     */
-    public boolean isAuthenticated(final Context context) {
-        return getProfile(context , CommonProfile.class) != null;
-    }
+	/**
+	 * Return if the user is authenticated.
+	 * 
+	 * @param context
+	 * @return if the user is authenticated
+	 */
+	public boolean isAuthenticated(final Context context) {
+		return getProfile(context, CommonProfile.class) != null;
+	}
+	
+	/*public boolean hasRoles(CommonProfile profile, List<String> roles) {
+		return profile.getRoles().containsAll(roles);
+	}
+	
+	public boolean hasPermission(CommonProfile profile, List<String> permission) {
+		
+		return false;
+	}*/
 
-    /**
-     * Read the profile from the request.
-     *
-     * @param context
-     * @return the user profile
-     */
-    public <T extends CommonProfile> T getProfile(final Context context , Class<T> tClass) {
-        Object profile = context.getAttribute(CONTEXT_PROFILE_NAME);
-        if (profile != null) {
-            return (T)profile;
-        }
+	/**
+	 * Read the profile from the request.
+	 * 
+	 * @param context
+	 * @return the user profile
+	 */
+	public <T extends CommonProfile> T getProfile(final Context context,
+			Class<T> tClass) {
+		Object profile = context.getAttribute(CONTEXT_PROFILE_NAME);
+		if (profile != null) {
+			return (T) profile;
+		}
 
-        NinjaWebContext nw = new NinjaWebContext(context);
-        String id = (String) nw.getSessionAttribute(PAC4J_PROFILE);
-        if (id == null) {
-            return null;
-        }
-        return profileAccess.read(id);
-    }
+		NinjaWebContext nw = new NinjaWebContext(context);
+		String id = (String) nw.getSessionAttribute(PAC4J_PROFILE);
+		if (id == null) {
+			return null;
+		}
+		return profileAccess.read(id);
+	}
 
-    /**
-     * Save the profile in session.
-     *
-     * @param context
-     * @param profile
-     */
-    public <T extends CommonProfile> void setProfile(final Context context, final T profile) {
-        String id = profileAccess.write(profile);
-        NinjaWebContext nw = new NinjaWebContext(context);
-        nw.setSessionAttribute(PAC4J_PROFILE, id);
-        context.setAttribute(CONTEXT_PROFILE_NAME , profile);
-    }
+	/**
+	 * Save the profile in session.
+	 * 
+	 * @param context
+	 * @param profile
+	 */
+	public <T extends CommonProfile> void setProfile(final Context context,
+			final T profile) {
+		String id = profileAccess.write(profile);
+		NinjaWebContext nw = new NinjaWebContext(context);
+		nw.setSessionAttribute(PAC4J_PROFILE, id);
+		context.setAttribute(CONTEXT_PROFILE_NAME, profile);
+	}
 
-    /**
-     * Logout the user.
-     *
-     * @param context
-     */
-    public void logout(final Context context) {
-        setProfile(context, null);
-        context.setAttribute(CONTEXT_PROFILE_NAME , null);
-    }
+	/**
+	 * Logout the user.
+	 * 
+	 * @param context
+	 */
+	public void logout(final Context context) {
+		setProfile(context, null);
+		context.setAttribute(CONTEXT_PROFILE_NAME, null);
+	}
 
 }

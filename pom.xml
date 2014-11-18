@@ -11,7 +11,7 @@
     <url></url>
 
     <properties>
-        <ninja.version>3.0.3</ninja.version>
+        <ninja.version>4.0.0</ninja.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
-            <version>1.4.1</version>
+            <version>1.6.0</version>
         </dependency>
 
         <dependency>

@@ -1,90 +1,101 @@
-ninja-pac4j
+Pac4j module for Ninja Framework
 ===========
+ninja-pac4j is an authentication and authorization module that's implements Pac4j in Ninja Framework. 
+The original source is from https://github.com/makotan/ninja-pac4j
 
-ninja pac4j module
-
-ninja > 3.x.x
-
-pac4j == 1.4.1
+This version supports:
+ninja >= 4.0.0
+pac4j 1.6.0
 
 
-setup
-===========
-
-git clone して maven install
-
-pom.xml
+Getting Started
 ---------------
 
-これを追加
+Setup
+---------------
+1) Clone this project into your local hard disk and run maven install.
 
+2) Create new maven project or from your existing project add this dependency into your maven project's pom.xml 
     <dependency>
         <groupId>ninja.auth.pac4j</groupId>
         <artifactId>ninja-pac4j</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
-バージョンは最新を
+3) Set login path url in application.conf:
+	pac4j.auth.login_path=/login
+  
+Set default client name (optional).
 
-その他に pac4j-xxx が必要なので追加する
+	pac4j.client.client_name=FormClient
 
-1.4.1はOK、1.5はNG(APIの変更に未対応)
-
-application.conf
----------------
-
-access error 時にlogin画面に飛ばすためのredirect先
-
-    pac4j.auth_error_redirect=/login
-
-defaultのClientName(option)
-
-    pac4j.client_name=FormClient
-
-loginがOKの時のredirect先
+The other way to define client is using @RequiresClient annotation at controller's type or method
+	
+	@FilterWith({Pac4jFilter.class})
+	@RequiresClient("FormClient")
+    public class ApplicationController {}
+    
+    or 
+    
+    @FilterWith({Pac4jFilter.class})
+    @RequiresClient("FormClient")
+    public Result index() {}
+    
+Set uri for successful login:
 
     pac4j.default_redirect=/
 
 
-ClientsFactory
----------------
+4) Create new class that implements ClientFactory and add your clients such as FormClient, FacebookClient, TwitterClient, etc. 
+This client configuration is based on what you set in application.ini and @RequiresClient annotation
 
-ClientsFactoryをimplementsしたclassを追加する
+For example:
+	
+	import com.makotan.ninja.authz.pac4j.configuration.ClientFactory;
+	
+	public class MyClientFactory implements ClientFactory {
+		
+		public Clients build() {
+			Clients clients = new Clients();
+			
+			final FacebookClient facebookClient = new FacebookClient("1558832927671715", "9a5c9f11f16f46c7a8b75648df311ea9");
+        	facebookClient.setCallbackUrl("http://mywebsite.com/callback");
+			
+			...
+			
+			return clients;
+		}
+		
+	}
 
-必要な各種Clientはここに定義
+5) Create class that implements ProfileAccess or you can use SampleProfileAccess
 
-TwitterやFacebookなどのClientに必要な情報は、このクラスでapplication.confや環境変数などから取得する
-
-
-ProfileAccess
----------------
-
-ProfileAccessをimplementsしたclassを追加する
-
-CommonProfileのTemporary Storageとして利用する為
-
-実際は Ninja’s Cache Api を利用してCacheにする、DynamoDBを利用するなどの方法で実装する
-
-Module
----------------
-
-ClientFactoryをimplementsしたclassとProfileAccessをimplementsしたclassの定義を追加する
+6) In conf/Module.java class, bind ClientsFactory and ProfileAccess interface to the class implementations respectively.
 
     bind(ClientsFactory.class).to(MyClientsFactory.class);
     bind(ProfileAccess.class).to(SampleProfileAccess.class);
 
-
-Routes
----------------
-CallbackContorllerのcallbackへPOSTを設定する
+7) Set route to the callback method in com.makotan.ninja.authz.pac4j.controllers.CallbackController.class using POST method
 
     router.POST().route("/callback").with(CallbackController.class , "callback");
 
+8) To filter the url with use Pac4jFilter.class in FilterWith annotation.
+	
+	public class ApplicationController  {
+    	
+    	@FilterWith({Pac4jFilter.class})
+    	public Result index() {...}
+    	
+    	...
+    }
 
-Controller
----------------
-Pac4jFilter.classをFilterとして追加する
+9) To add roles or/and permission to the Pac4jFilter, use com.makotan.ninja.authz.pac4j.annotations.RequiresRoles 
+and com.makotan.ninja.authz.pac4j.annotations.RequiresPermissions
+	
+	@FilterWith({Pac4jFilter.class})
+	@RequiresRoles(value={"ROLE_ADMIN","ROLE_USER", }, Logical.OR)
+	@RequiresPermissions(value={"PERMISSION_VIEW", "PERMISSION_ADD"}, Logical.AND)
+	public Result index() {...}
 
-    @FilterWith({Pac4jFileter.class})
 
 
