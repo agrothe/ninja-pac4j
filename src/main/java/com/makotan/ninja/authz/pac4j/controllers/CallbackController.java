@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
+import ninja.SecureFilter;
 import ninja.servlet.util.Request;
 import ninja.utils.NinjaProperties;
 
@@ -32,6 +33,7 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.CommonHelper;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
+
 
 
 import com.google.inject.Inject;
@@ -83,6 +85,9 @@ public class CallbackController {
         if (profile != null) {
             // only save profile when it's not null
             userUtils.setProfile(context , profile);
+            
+            // set username for use in @LoggenInUser annotation or even SecureFilter
+            context.getSession().put(SecureFilter.USERNAME, profile.getUsername());
         }
         
         String requestedUrl = (String) nwContext.getSessionAttribute(Pac4jFilter.ORIGINAL_REQUESTED_URL);

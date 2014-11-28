@@ -86,6 +86,11 @@ public class Pac4jFilter implements Filter {
     }
 
     public Result filter(FilterChain filterChain, Context context) {
+    	/*if (context.getSession() == null) {
+            // no session
+            return ninja.getUnauthorizedResult(context);
+        }*/
+    	
         CommonProfile profile = userUtils.getProfile(context , CommonProfile.class);
         logger.log(Level.FINE, "profile : "+ profile);
         
